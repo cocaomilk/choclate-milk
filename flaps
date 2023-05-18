@@ -1,0 +1,83 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Game window dimensions
+WIDTH = 400
+HEIGHT = 600
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Create game window
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Flappy Bird")
+
+# Bird properties
+bird_radius = 20
+bird_x = 100
+bird_y = int(HEIGHT / 2)
+bird_velocity = 0
+gravity = 0.5
+
+# Pipe properties
+pipe_width = 70
+pipe_height = 400
+pipe_gap = 200
+pipe_x = WIDTH
+pipe_speed = 3
+
+# Game over flag
+game_over = False
+
+# Load images
+background_img = pygame.image.load("background.png")
+bird_img = pygame.image.load("bird.png")
+pipe_img = pygame.image.load("pipe.png")
+
+# Resize images
+background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
+bird_img = pygame.transform.scale(bird_img, (bird_radius * 2, bird_radius * 2))
+pipe_img = pygame.transform.scale(pipe_img, (pipe_width, pipe_height))
+
+# Main game loop
+while not game_over:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                bird_velocity = -10
+    
+    # Update bird position and velocity
+    bird_y += bird_velocity
+    bird_velocity += gravity
+    
+    # Update pipe position
+    pipe_x -= pipe_speed
+    
+    # Check collision
+    if bird_y > HEIGHT or bird_y < 0:
+        game_over = True
+    if pipe_x < -pipe_width:
+        pipe_x = WIDTH
+    if bird_x + bird_radius > pipe_x and bird_x - bird_radius < pipe_x + pipe_width:
+        if bird_y - bird_radius < pipe_height or bird_y + bird_radius > pipe_height + pipe_gap:
+            game_over = True
+    
+    # Draw elements
+    window.blit(background_img, (0, 0))
+    window.blit(bird_img, (bird_x - bird_radius, bird_y - bird_radius))
+    window.blit(pipe_img, (pipe_x, 0))
+    window.blit(pygame.transform.flip(pipe_img, False, True), (pipe_x, pipe_height + pipe_gap))
+    
+    # Update display
+    pygame.display.update()
+
+    # Set FPS
+    pygame.time.Clock().tick(30)
